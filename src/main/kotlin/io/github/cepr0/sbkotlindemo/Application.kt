@@ -17,8 +17,8 @@ import javax.persistence.PrePersist
 class Application(private val repo: ModelRepo) {
     @EventListener
     fun onReady(e: ApplicationReadyEvent) {
-        val collect = IntStream.range(0, 10).mapToObj { Model(null, it) }.collect(toList())
-        repo.saveAll(collect)
+        val models = IntStream.range(0, 10).mapToObj { Model(null, it) }.collect(toList())
+        repo.saveAll(models)
     }
 }
 
