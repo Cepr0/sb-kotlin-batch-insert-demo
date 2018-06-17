@@ -14,11 +14,11 @@ import javax.persistence.Id
 import javax.persistence.PrePersist
 
 @SpringBootApplication
-open class Application(private val repo: ModelRepo) {
+class Application(private val repo: ModelRepo) {
     @EventListener
     fun onReady(e: ApplicationReadyEvent) {
-        val collect = IntStream.range(0, 10).mapToObj { Model(null, it) }.collect(toList());
-        repo.saveAll(collect);
+        val collect = IntStream.range(0, 10).mapToObj { Model(null, it) }.collect(toList())
+        repo.saveAll(collect)
     }
 }
 
