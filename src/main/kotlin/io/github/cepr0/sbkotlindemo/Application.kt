@@ -20,6 +20,9 @@ class Application(private val repo: ModelRepo) {
         val models = IntStream.range(0, 10).mapToObj { Model(it) }.collect(toList())
         repo.saveAll(models)
         repo.findAll().forEach(System.out::println)
+
+        val model = repo.getModelById(UUID.randomUUID()) ?: Model(0) // throw IllegalArgumentException("foo not found")
+        println(model)
     }
 }
 
@@ -63,4 +66,6 @@ data class Model (private val value: Int) : BaseEntity() {
     }
 }
 
-interface ModelRepo : JpaRepository<Model, Int>
+interface ModelRepo : JpaRepository<Model, UUID> {
+    fun getModelById(id: UUID): Model?
+}
