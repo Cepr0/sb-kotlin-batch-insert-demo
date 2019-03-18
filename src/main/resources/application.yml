@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    properties:
+      hibernate.jdbc.batch_size: 5
+
+logging:
+  level:
+    jdbc:
+      sqlonly: fatal
+      resultsettable: info
+      sqltiming: info
+      audit: fatal
+      resultset: fatal
+      connection: fatal
+
+log4jdbc:
+  dump:
+    sql:
+      addsemicolon: true
+      maxlinelength: 0
+  trim:
+    sql:
+      extrablanklines: false

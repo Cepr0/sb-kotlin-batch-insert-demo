@@ -2,51 +2,37 @@ package io.github.cepr0.sbkotlindemo
 
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.domain.Persistable
 import java.time.Instant
+import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 import javax.persistence.Version
 
 /**
- * Example of base entity with arbitrary 'id' type.
- * Id generation must be provided in the constructor while extending this class.
+ * Base entity class with arbitrary 'id' type.
  */
 @MappedSuperclass
-abstract class BaseEntity<T>(
-        @Id private val id: T
-) : Persistable<T> {
+abstract class BaseEntity<T> {
 
-    @Version
-    private val version: Long? = null
-
-    @field:CreationTimestamp
-    val createdAt: Instant? = null
-
-    @field:UpdateTimestamp
-    val updatedAt: Instant? = null
-
-    override fun getId(): T {
-        return id
-    }
-
-    override fun isNew(): Boolean {
-        return version == null
-    }
+    @Id @GeneratedValue var id: T? = null
+    @Version var version: Int? = null
+    @field:CreationTimestamp var createdAt: Instant? = null
+    @field:UpdateTimestamp var updatedAt: Instant? = null
 
     override fun toString(): String {
-        return "BaseEntity(id=$id, version=$version, createdAt=$createdAt, updatedAt=$updatedAt, isNew=$isNew)"
+        return "id=$id, version=$version, createdAt=$createdAt, updatedAt=$updatedAt"
     }
 
+    // See details here https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/
     override fun equals(other: Any?): Boolean {
+        other ?: return false
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (javaClass != other.javaClass) return false
         other as BaseEntity<*>
-        if (id != other.id) return false
-        return true
+        return if (id == null) false else id == other.id
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return 31
     }
 }
