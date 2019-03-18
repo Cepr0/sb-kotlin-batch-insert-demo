@@ -6,6 +6,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.runApplication
 import org.springframework.context.event.EventListener
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -30,7 +31,7 @@ class Application(val repo: ModelRepo, val service: ModelService) {
         repo.findAll().forEach(System.out::println)
 
         // example of reading one model or returning the default
-        println(repo.getById(UUID.randomUUID()) ?: Model("default value"))
+        println(repo.findByIdOrNull(UUID.randomUUID()) ?: Model("default value"))
 
         // variant with Optional
         println(repo.findById(UUID.randomUUID()).orElse(Model("default value")))
@@ -55,9 +56,7 @@ data class Model(var value: String) : BaseEntity<UUID>() {
     }
 }
 
-interface ModelRepo : JpaRepository<Model, UUID> {
-    fun getById(id: UUID): Model?
-}
+interface ModelRepo : JpaRepository<Model, UUID>
 
 @Service
 class ModelService(val repo: ModelRepo) {
