@@ -14,10 +14,18 @@ import javax.persistence.Version
 @MappedSuperclass
 abstract class BaseEntity<T> {
 
-    @Id @GeneratedValue var id: T? = null
-    @Version var version: Int? = null
-    @field:CreationTimestamp var createdAt: Instant? = null
-    @field:UpdateTimestamp var updatedAt: Instant? = null
+    @Id
+    @GeneratedValue
+    var id: T? = null
+
+    @Version
+    var version: Int? = null
+
+    @field:CreationTimestamp
+    var createdAt: Instant? = null
+
+    @field:UpdateTimestamp
+    var updatedAt: Instant? = null
 
     override fun toString(): String {
         return "id=$id, version=$version, createdAt=$createdAt, updatedAt=$updatedAt"
@@ -25,11 +33,9 @@ abstract class BaseEntity<T> {
 
     // See details here https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/
     override fun equals(other: Any?): Boolean {
-        other ?: return false
-        if (this === other) return true
-        if (javaClass != other.javaClass) return false
-        other as BaseEntity<*>
-        return if (id == null) false else id == other.id
+        return if (this === other) true
+        else if (!javaClass.isInstance(other)) false
+        else id != null && id == (other as BaseEntity<*>).id
     }
 
     override fun hashCode(): Int {

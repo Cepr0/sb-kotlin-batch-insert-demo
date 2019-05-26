@@ -1,5 +1,6 @@
 package io.github.cepr0.sbkotlindemo
 
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.BeanUtils
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -21,28 +22,36 @@ fun main(args: Array<String>) {
 @SpringBootApplication
 class Application(val repo: ModelRepo, val service: ModelService) {
 
+    val log = getLogger(Application::class.java)
+
     @EventListener
     fun onReady(e: ApplicationReadyEvent) {
 
         // batch inserting
-        repo.saveAll(IntStream.range(0, 10).mapToObj { Model("value #$it") }.collect(toList<Model>()))
+        log.info("[i] Batch inserting...")
+        repo.saveAll(IntStream.range(0, 5).mapToObj { Model("value #$it") }.collect(toList<Model>()))
 
         // read all data from DB
-        repo.findAll().forEach(System.out::println)
+        log.info("[i] Reading all entities...")
+        repo.findAll();//.forEach(System.out::println)
 
         // example of reading one model or returning the default
+        log.info("[i] Reading one entity...")
         println(repo.findByIdOrNull(UUID.randomUUID()) ?: Model("default value"))
 
         // variant with Optional
+        log.info("[i] Reading one entity (a variant with Optional)...")
         println(repo.findById(UUID.randomUUID()).orElse(Model("default value")))
 
         // per element updating
+        log.info("[i] Per element updating...")
         repo.findAll().forEach { it.id?.let { id -> service.update(id, Model("${it.value} updated")) } }
-        repo.findAll().forEach(System.out::println)
+        //repo.findAll().forEach(System.out::println)
 
         // batch updating
+        log.info("[i] Batch updating...")
         service.batchUpdate({ repo.findAll() }, { value -> Model("${value} updated") })
-        repo.findAll().forEach(System.out::println)
+        //repo.findAll().forEach(System.out::println)
     }
 }
 
@@ -61,10 +70,12 @@ interface ModelRepo : JpaRepository<Model, UUID>
 @Service
 class ModelService(val repo: ModelRepo) {
 
+    private val IGNORED_PROPS = arrayOf("id", "version", "createdAt", "updatedAt")
+
     @Transactional
     fun update(id: UUID, model: Model): Optional<Model> {
         return repo.findById(id).map {
-            BeanUtils.copyProperties(model, it, "id", "version", "createdAt", "updatedAt")
+            BeanUtils.copyProperties(model, it, *IGNORED_PROPS)
             return@map it
         }
     }
@@ -73,7 +84,7 @@ class ModelService(val repo: ModelRepo) {
     fun batchUpdate(models: () -> Collection<Model>, mapper: (String) -> Model): Collection<Model> {
         return models.invoke().map {
             val model = mapper.invoke(it.value)
-            BeanUtils.copyProperties(model, it, "id", "version", "createdAt", "updatedAt")
+            BeanUtils.copyProperties(model, it, *IGNORED_PROPS)
             return@map it
         }
     }
